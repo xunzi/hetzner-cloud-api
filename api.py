@@ -73,8 +73,8 @@ class HetznerCloudConnection:
         for _key in _resp:
             self.sshkeys.append(_key)
         #self.debugprint("Found {0} keys".format(len(self.sshkeys)))
-        for _key in self.sshkeys:
-            self.debugprint("Key id {0}, name {1}, fingerprint {2}".format(_key['id'], _key['name'], _key['fingerprint']))
+        # for _key in self.sshkeys:
+        #     self.debugprint("Key id {0}, name {1}, fingerprint {2}".format(_key['id'], _key['name'], _key['fingerprint']))
 
     def create_server(self, name = ""):
         server_spec = self.defaults
