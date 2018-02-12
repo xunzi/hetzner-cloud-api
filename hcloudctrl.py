@@ -36,7 +36,7 @@ if __name__ == "__main__":
         if args.list:
             h.debugprint(h.servers)
             for s in h.servers:
-                print("- Server {0} - {1} - {2}".format(s['id'], s['name'], s['public_net']['ipv4']['ip']))
+                print("- Server id {0} - {1} - {2} ({3})".format(s['id'], s['name'], s['public_net']['ipv4']['ip'], s['status']))
         # if args.listkeys:
         #     for k in h.sshkeys:
         #         print("- Ssh key {0} ({1}".format(k['name'], k['fingerprint']))
