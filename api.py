@@ -46,7 +46,7 @@ class HetznerCloudConnection:
         #self.debugprint(_resp.text)
         return _resp
 
-    def delete(self,server_id):
+    def delete_server(self,server_id):
         self.session.headers.update({"Content-Type": "application/json"})
         _resp = self.session.delete("{0}/servers/{1}".format(APIBASE, server_id))
         #self.debugprint(_resp.text)
@@ -83,7 +83,23 @@ class HetznerCloudConnection:
         _resp = self.post("servers", payload = server_spec)
         #self.debugprint(_resp)
         return _resp
+    
+    def create_key(self, name="", key=""):
+        key_spec = {'name': name, 'public_key': key}
+        _resp = self.post("ssh_keys", payload = key_spec)
+        return _resp
+
+    def get_keyid(self, name=""):
+        _id = None
+        for k in self.sshkeys:
+            if k['name'] == name:
+                _id = k['id']
+        return _id
         
+    def delete_key(self, keyid):
+        self.session.headers.update({"Content-Type": "application/json"})
+        _resp = self.session.delete("{0}/ssh_keys/{1}".format(APIBASE, keyid))
+
 if __name__ == "__main__":
     sys.stderr.write("This is meant for importing\n")
     sys.exit(1)
