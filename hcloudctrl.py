@@ -10,12 +10,14 @@ parser = argparse.ArgumentParser()
 subparsers = parser.add_subparsers(title = "Subcommands", help = "Subcommands", dest = "subcommand")
 server_parser = subparsers.add_parser("servers", help = "Server commands")
 key_parser = subparsers.add_parser("keys", help = "Ssh key commands")
+images_parser = subparsers.add_parser("images", help = "image commands")
 
 server_parser.add_argument("-l", "--list", help = "list", action = "store_true")
 server_parser.add_argument("-c", "--create", help = "create", action = "store_true")
 server_parser.add_argument("-n", "--name", help = "name of item")
 server_parser.add_argument("-D", "--delete", help = "delete", action = "store_true")
 server_parser.add_argument("-d", "--debug", help = "debug mode", action = "store_true", default = False)
+server_parser.add_argument("-L", "--list-types", help = "list available server types", action = "store_true", dest = "list_types")
 
 key_parser.add_argument("-l", "--list", help = "list", action = "store_true")
 key_parser.add_argument("-i", "--import", help = "import key from file", action = "store_true", dest = "importkey")
@@ -24,6 +26,7 @@ key_parser.add_argument("-D", "--delete", help = "delete", action = "store_true"
 key_parser.add_argument("-f", "--file", help = "path to public key file to import", dest = "keyfile")
 key_parser.add_argument("-d", "--debug", help = "debug mode", action = "store_true", default = False)
 
+images_parser.add_argument("-l", "--list", help = "list", action = "store_true", default = True)
 
 
 
@@ -32,15 +35,14 @@ args = parser.parse_args()
 
 
 if __name__ == "__main__":
-    h = api.HetznerCloudConnection(debug = args.debug)
+    h = api.HetznerCloudConnection()
     if args.subcommand == "servers":
         if args.list:
             h.debugprint(h.servers)
             for s in h.servers:
                 print("- Server id {0} - {1} - {2} ({3})".format(s['id'], s['name'], s['public_net']['ipv4']['ip'], s['status']))
-        # if args.listkeys:
-        #     for k in h.sshkeys:
-        #         print("- Ssh key {0} ({1}".format(k['name'], k['fingerprint']))
+        if args.debug:
+            h.debug = True
         if args.create:
             if not args.name:
                 sys.stderr.write("Please supply a hostname\n")
@@ -54,7 +56,13 @@ if __name__ == "__main__":
             _id = h.get_serverid(args.name)
             h.debugprint("{0} - {1}".format(args.name, _id))
             h.delete_server(_id)
-        
+
+        if args.list_types:
+            _resp = h.get("server_types")
+            for _t in _resp:
+                print("- {0} - {1} cores - {2} gb ram - {3} gb diskspace".format(_t['name'], _t['cores'], _t['memory'], _t['disk']) )
+            sys.exit(0)
+
     if args.subcommand == "keys":
         if args.list:
             for k in h.sshkeys:
@@ -74,3 +82,9 @@ if __name__ == "__main__":
             _keyid = h.get_keyid(args.name)
             h.debugprint("Found key {0}".format(_keyid))
             h.delete_key(_keyid)
+
+    if args.subcommand == "images":
+        if args.list:
+            _resp = h.get("images")
+            for _i in _resp:
+                print("- {0} - {1} - type {2}".format(_i['id'], _i['name'], _i['type']    ))
