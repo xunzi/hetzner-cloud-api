@@ -60,7 +60,10 @@ if __name__ == "__main__":
         if args.list_types:
             _resp = h.get("server_types")
             for _t in _resp:
-                print("- {0} - {1} cores - {2} gb ram - {3} gb diskspace".format(_t['name'], _t['cores'], _t['memory'], _t['disk']) )
+                _prices = {}
+                for _location in _t['prices']:
+                    _prices.update({_location['location']:  round(float(_location['price_monthly']['gross']), 2)})
+                print("- {0} - {1} cores - {2} gb ram - {3} gb diskspace ({4} Euro per month".format(_t['name'], _t['cores'], _t['memory'], _t['disk'], _prices) )
             sys.exit(0)
 
     if args.subcommand == "keys":
