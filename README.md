@@ -8,4 +8,4 @@ export API_TOKEN=someverylongstring
 
 You can generate a token in the Hetzner web gui under "Access -> API Tokens"
 
-This is really unfinished, if you want a more complete solution https://github.com/elsyms/hetznercloud-py looks promising.
+This is really unfinished, especially with regards to error handling and informative output. If you want a more complete solution https://github.com/elsyms/hetznercloud-py looks promising.
