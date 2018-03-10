@@ -21,6 +21,7 @@ server_parser.add_argument("-D", "--delete", help = "delete", action = "store_tr
 server_parser.add_argument("-d", "--debug", help = "debug mode", action = "store_true", default = False)
 server_parser.add_argument("-L", "--list-types", help = "list available server types", action = "store_true", dest = "list_types")
 server_parser.add_argument("-r", "--reboot", help="soft reboot a server", action = "store_true")
+server_parser.add_argument("-t", "--type", help = "image type, run {0} images -l to list available types".format(sys.argv[0]), dest = "imagetype")
 
 key_parser.add_argument("-l", "--list", help = "list", action = "store_true")
 key_parser.add_argument("-i", "--import", help = "import key from file", action = "store_true", dest = "importkey")
@@ -28,6 +29,7 @@ key_parser.add_argument("-n", "--name", help = "name of item")
 key_parser.add_argument("-D", "--delete", help = "delete", action = "store_true")
 key_parser.add_argument("-f", "--file", help = "path to public key file to import", dest = "keyfile")
 key_parser.add_argument("-d", "--debug", help = "debug mode", action = "store_true", default = False)
+
 
 images_parser.add_argument("-l", "--list", help = "list", action = "store_true", default = True)
 
@@ -43,14 +45,19 @@ if __name__ == "__main__":
         if args.list:
             h.debugprint(h.servers)
             for s in h.servers:
-                print("- Server id {0} - {1} - {2} ({3})".format(s['id'], s['name'], s['public_net']['ipv4']['ip'], s['status']))
+                print("- Server id {0} - {1} - {2} - {4} ({3})".format(s['id'], s['name'], s['public_net']['ipv4']['ip'], s['status'], s['image']['name']))
         if args.debug:
             h.debug = True
+
         if args.create:
             if not args.name:
                 sys.stderr.write("Please supply a hostname\n")
                 sys.exit(1)
-            h.create_server(args.name)
+            if args.imagetype:
+                h.defaults["image"] = args.imagetype
+            _resp = h.create_server(args.name)
+            h.check_apiresponse(_resp)
+
         
         if args.delete:
             if not args.name:

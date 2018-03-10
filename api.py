@@ -35,6 +35,14 @@ class HetznerCloudConnection:
         if self.debug:
             sys.stderr.write("{0}\n".format(msg))
 
+    def check_apiresponse(self, resp):
+        if not resp.ok:
+            sys.stderr.write("An errror occurred: {0}".format(resp.json()['error']['message']))
+            sys.exit(1)
+        else:
+            self.debugprint("Status ok")
+            sys.exit(0)
+            
     def get(self, path):
         _resp = self.session.get("{0}/{1}".format(APIBASE, path))
         #self.debugprint(_resp.text)
