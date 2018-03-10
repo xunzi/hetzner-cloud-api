@@ -20,7 +20,6 @@ server_parser.add_argument("-c", "--create", help = "create", action = "store_tr
 server_parser.add_argument("-n", "--name", help = "name of item")
 server_parser.add_argument("-D", "--delete", help = "delete", action = "store_true")
 server_parser.add_argument("-d", "--debug", help = "debug mode", action = "store_true", default = False)
-server_parser.add_argument("-L", "--list-types", help = "list available server types", action = "store_true", dest = "list_types")
 server_parser.add_argument("-r", "--reboot", help="soft reboot a server", action = "store_true")
 server_parser.add_argument("-i", "--image", help = "image type, run {0} images -l to list available types".format(sys.argv[0]), dest = "imagetype")
 server_parser.add_argument("-t", "--type", help = "server type", dest = "servertype", default = api.HetznerCloudConnection().defaults["server_type"])
@@ -62,7 +61,7 @@ if __name__ == "__main__":
             if args.servertype:
                 h.defaults['server_type'] = args.servertype
             _resp = h.create_server(args.name)
-            h.check_apiresponse(_resp)
+            h.check_apiresponse(_resp, "server {0} created".format(args.name))
 
         
         if args.delete:
@@ -72,16 +71,7 @@ if __name__ == "__main__":
             _id = h.get_serverid(args.name)
             h.debugprint("{0} - {1}".format(args.name, _id))
             _resp = h.delete_server(_id)
-            h.check_apiresponse(_resp, "{0} deleted".format(args.name))
-
-        if args.list_types:
-            _resp = h.get("server_types")
-            for _t in _resp:
-                _prices = {}
-                for _location in _t['prices']:
-                    _prices.update({_location['location']:  round(float(_location['price_monthly']['gross']), 2)})
-                print("- {0} - {1} cores - {2} gb ram - {3} gb diskspace ({4} Euro per month".format(_t['name'], _t['cores'], _t['memory'], _t['disk'], _prices) )
-            sys.exit(0)
+            h.check_apiresponse(_resp, "server {0} deleted".format(args.name))
 
         if args.reboot:
             if not args.name:
