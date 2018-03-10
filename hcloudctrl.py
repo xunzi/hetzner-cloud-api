@@ -13,6 +13,7 @@ subparsers = parser.add_subparsers(title = "Subcommands", help = "Subcommands", 
 server_parser = subparsers.add_parser("servers", help = "Server commands")
 key_parser = subparsers.add_parser("keys", help = "Ssh key commands")
 images_parser = subparsers.add_parser("images", help = "image commands")
+servertype_parser = subparsers.add_parser("servertypes", help = "servertype commands")
 
 server_parser.add_argument("-l", "--list", help = "list", action = "store_true")
 server_parser.add_argument("-c", "--create", help = "create", action = "store_true")
@@ -21,7 +22,8 @@ server_parser.add_argument("-D", "--delete", help = "delete", action = "store_tr
 server_parser.add_argument("-d", "--debug", help = "debug mode", action = "store_true", default = False)
 server_parser.add_argument("-L", "--list-types", help = "list available server types", action = "store_true", dest = "list_types")
 server_parser.add_argument("-r", "--reboot", help="soft reboot a server", action = "store_true")
-server_parser.add_argument("-t", "--type", help = "image type, run {0} images -l to list available types".format(sys.argv[0]), dest = "imagetype")
+server_parser.add_argument("-i", "--image", help = "image type, run {0} images -l to list available types".format(sys.argv[0]), dest = "imagetype")
+server_parser.add_argument("-t", "--type", help = "server type", dest = "servertype", default = api.HetznerCloudConnection().defaults["server_type"])
 
 key_parser.add_argument("-l", "--list", help = "list", action = "store_true")
 key_parser.add_argument("-i", "--import", help = "import key from file", action = "store_true", dest = "importkey")
@@ -32,6 +34,8 @@ key_parser.add_argument("-d", "--debug", help = "debug mode", action = "store_tr
 
 
 images_parser.add_argument("-l", "--list", help = "list", action = "store_true", default = True)
+
+servertype_parser.add_argument("-l", "--list", help = "list available server types", action = "store_true")
 
 
 
@@ -45,7 +49,7 @@ if __name__ == "__main__":
         if args.list:
             h.debugprint(h.servers)
             for s in h.servers:
-                print("- Server id {0} - {1} - {2} - {4} ({3})".format(s['id'], s['name'], s['public_net']['ipv4']['ip'], s['status'], s['image']['name']))
+                print("- Server id {0} - {1} - {2} - {4}/{5} ({3})".format(s['id'], s['name'], s['public_net']['ipv4']['ip'], s['status'], s['image']['name'], s["server_type"]['name']))
         if args.debug:
             h.debug = True
 
@@ -55,6 +59,8 @@ if __name__ == "__main__":
                 sys.exit(1)
             if args.imagetype:
                 h.defaults["image"] = args.imagetype
+            if args.servertype:
+                h.defaults['server_type'] = args.servertype
             _resp = h.create_server(args.name)
             h.check_apiresponse(_resp)
 
@@ -121,3 +127,10 @@ if __name__ == "__main__":
             _resp = h.get("images")
             for _i in _resp:
                 print("- {0} - {1} - type {2}".format(_i['id'], _i['name'], _i['type']))
+
+    if args.subcommand == "servertypes":
+        if args.list:
+            _resp = h.get("server_types")
+            for _t in _resp:
+                print("- {0} - {1} - {2} cores, {3} GB RAM, {4} GB disk size, {5} storage".format(_t['id'], _t['name'], _t['cores'], _t['memory'], _t['disk'], _t['storage_type']))
+            sys.exit(0)
