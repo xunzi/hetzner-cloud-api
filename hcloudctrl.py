@@ -4,6 +4,8 @@ import api
 import sys
 
 import argparse
+
+
 parser = argparse.ArgumentParser()
 
 
@@ -18,6 +20,7 @@ server_parser.add_argument("-n", "--name", help = "name of item")
 server_parser.add_argument("-D", "--delete", help = "delete", action = "store_true")
 server_parser.add_argument("-d", "--debug", help = "debug mode", action = "store_true", default = False)
 server_parser.add_argument("-L", "--list-types", help = "list available server types", action = "store_true", dest = "list_types")
+server_parser.add_argument("-r", "--reboot", help="soft reboot a server", action = "store_true")
 
 key_parser.add_argument("-l", "--list", help = "list", action = "store_true")
 key_parser.add_argument("-i", "--import", help = "import key from file", action = "store_true", dest = "importkey")
@@ -66,6 +69,20 @@ if __name__ == "__main__":
                 print("- {0} - {1} cores - {2} gb ram - {3} gb diskspace ({4} Euro per month".format(_t['name'], _t['cores'], _t['memory'], _t['disk'], _prices) )
             sys.exit(0)
 
+        if args.reboot:
+            if not args.name:
+               sys.stderr.write("Please supply a hostname\n")
+               sys.exit(1)
+            _id = h.get_serverid(args.name)
+            h.debugprint("found id {0} for server {1}".format(_id, args.name))
+            _resp = h.post("servers/{0}/actions/reboot".format(_id))
+            if _resp.ok:
+                h.debugprint("Reboot action {0} intiated".format(_resp.json()['action']['id']))
+            else:
+                print("Something went wrong: {0}".format(_resp.json()['error']['message']))
+                sys.exit(1)
+            sys.exit(0)
+
     if args.subcommand == "keys":
         if args.list:
             for k in h.sshkeys:
@@ -78,6 +95,11 @@ if __name__ == "__main__":
                 keystring =  keyfile.read()
                 _resp = h.create_key(name=args.name, key = keystring)
                 h.debugprint(_resp)
+                if _resp.ok:
+                    print("Key {0} created".format(args.name))
+                else:
+                    sys.stderr.write("Error creating key: {0}".format(_resp.json()['error']['message']))
+                    sys.exit(1)
         if args.delete:
             if not args.name:
                 sys.stderr.write("Please supply a key name\n")
@@ -85,9 +107,10 @@ if __name__ == "__main__":
             _keyid = h.get_keyid(args.name)
             h.debugprint("Found key {0}".format(_keyid))
             h.delete_key(_keyid)
+            sys.exit(0)
 
     if args.subcommand == "images":
         if args.list:
             _resp = h.get("images")
             for _i in _resp:
-                print("- {0} - {1} - type {2}".format(_i['id'], _i['name'], _i['type']    ))
+                print("- {0} - {1} - type {2}".format(_i['id'], _i['name'], _i['type']))

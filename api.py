@@ -97,8 +97,10 @@ class HetznerCloudConnection:
         return _id
         
     def delete_key(self, keyid):
-        self.session.headers.update({"Content-Type": "application/json"})
+        #self.session.headers.update({"Content-Type": "application/json"})
         _resp = self.session.delete("{0}/ssh_keys/{1}".format(APIBASE, keyid))
+
+        
 
 if __name__ == "__main__":
     sys.stderr.write("This is meant for importing\n")
