@@ -1,4 +1,4 @@
-# hetzner-cloud-api
+# Hetzner-cloud-api
 Basic usage examples for Hetzner Cloud API (https://docs.hetzner.cloud/#top)
 Requires an API token exported to as environment variable:
 

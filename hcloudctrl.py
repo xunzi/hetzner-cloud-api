@@ -71,7 +71,8 @@ if __name__ == "__main__":
                 sys.exit(1)
             _id = h.get_serverid(args.name)
             h.debugprint("{0} - {1}".format(args.name, _id))
-            h.delete_server(_id)
+            _resp = h.delete_server(_id)
+            h.check_apiresponse(_resp, "{0} deleted".format(args.name))
 
         if args.list_types:
             _resp = h.get("server_types")
@@ -89,17 +90,13 @@ if __name__ == "__main__":
             _id = h.get_serverid(args.name)
             h.debugprint("found id {0} for server {1}".format(_id, args.name))
             _resp = h.post("servers/{0}/actions/reboot".format(_id))
-            if _resp.ok:
-                h.debugprint("Reboot action {0} intiated".format(_resp.json()['action']['id']))
-            else:
-                print("Something went wrong: {0}".format(_resp.json()['error']['message']))
-                sys.exit(1)
-            sys.exit(0)
+            h.check_apiresponse(_resp)
 
     if args.subcommand == "keys":
         if args.list:
             for k in h.sshkeys:
                 print("- Ssh key id {0} - {1} - {2}".format(k['id'], k['name'], k['fingerprint']))
+            sys.exit(0)
         if args.importkey:
             if not args.name:
                 sys.stderr.write("Please supply a key name\n")
@@ -107,20 +104,15 @@ if __name__ == "__main__":
             with open(args.keyfile) as keyfile:
                 keystring =  keyfile.read()
                 _resp = h.create_key(name=args.name, key = keystring)
-                h.debugprint(_resp)
-                if _resp.ok:
-                    print("Key {0} created".format(args.name))
-                else:
-                    sys.stderr.write("Error creating key: {0}".format(_resp.json()['error']['message']))
-                    sys.exit(1)
+                h.check_apiresponse(_resp, "Ssh key {0} created".format(args.name))
         if args.delete:
             if not args.name:
                 sys.stderr.write("Please supply a key name\n")
                 sys.exit(1)
             _keyid = h.get_keyid(args.name)
             h.debugprint("Found key {0}".format(_keyid))
-            h.delete_key(_keyid)
-            sys.exit(0)
+            _resp = h.delete_key(_keyid)
+            h.check_apiresponse(_resp, "Key {0} deleted".format(args.name))
 
     if args.subcommand == "images":
         if args.list:

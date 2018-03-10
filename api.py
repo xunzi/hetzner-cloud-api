@@ -35,14 +35,15 @@ class HetznerCloudConnection:
         if self.debug:
             sys.stderr.write("{0}\n".format(msg))
 
-    def check_apiresponse(self, resp):
+    def check_apiresponse(self, resp, okmsg=""):
         if not resp.ok:
             sys.stderr.write("An errror occurred: {0}".format(resp.json()['error']['message']))
             sys.exit(1)
         else:
+            print(okmsg)
             self.debugprint("Status ok")
             sys.exit(0)
-            
+
     def get(self, path):
         _resp = self.session.get("{0}/{1}".format(APIBASE, path))
         #self.debugprint(_resp.text)
@@ -107,6 +108,7 @@ class HetznerCloudConnection:
     def delete_key(self, keyid):
         #self.session.headers.update({"Content-Type": "application/json"})
         _resp = self.session.delete("{0}/ssh_keys/{1}".format(APIBASE, keyid))
+        return _resp
 
         
 
