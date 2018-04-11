@@ -23,6 +23,7 @@ server_parser.add_argument("-d", "--debug", help = "debug mode", action = "store
 server_parser.add_argument("-r", "--reboot", help="soft reboot a server", action = "store_true")
 server_parser.add_argument("-i", "--image", help = "image type, run {0} images -l to list available types".format(sys.argv[0]), dest = "imagetype")
 server_parser.add_argument("-t", "--type", help = "server type", dest = "servertype", default = api.HetznerCloudConnection().defaults["server_type"])
+server_parser.add_argument("-k", "--key", help = "ssh key to install", dest = "key", default = "" )
 
 key_parser.add_argument("-l", "--list", help = "list", action = "store_true")
 key_parser.add_argument("-i", "--import", help = "import key from file", action = "store_true", dest = "importkey")
@@ -60,6 +61,9 @@ if __name__ == "__main__":
                 h.defaults["image"] = args.imagetype
             if args.servertype:
                 h.defaults['server_type'] = args.servertype
+            if args.key:
+                _k = h.get_keyid(args.key)
+                h.defaults["ssh_keys"] = [ _k ]
             _resp = h.create_server(args.name)
             h.check_apiresponse(_resp, "server {0} created".format(args.name))
 
