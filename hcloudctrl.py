@@ -20,10 +20,10 @@ server_parser.add_argument("-c", "--create", help = "create", action = "store_tr
 server_parser.add_argument("-n", "--name", help = "name of item")
 server_parser.add_argument("-D", "--delete", help = "delete", action = "store_true")
 server_parser.add_argument("-d", "--debug", help = "debug mode", action = "store_true", default = False)
-server_parser.add_argument("-r", "--reboot", help="soft reboot a server", action = "store_true")
 server_parser.add_argument("-i", "--image", help = "image type, run {0} images -l to list available types".format(sys.argv[0]), dest = "imagetype")
 server_parser.add_argument("-t", "--type", help = "server type", dest = "servertype", default = api.HetznerCloudConnection().defaults["server_type"])
 server_parser.add_argument("-k", "--key", help = "ssh key to install", dest = "key", default = "" )
+server_parser.add_argument("-a", "--action", choices = ['shutdown', 'reboot', 'reset', 'poweron', 'poweroff', 'reset_password'])
 
 key_parser.add_argument("-l", "--list", help = "list", action = "store_true")
 key_parser.add_argument("-i", "--import", help = "import key from file", action = "store_true", dest = "importkey")
@@ -77,14 +77,17 @@ if __name__ == "__main__":
             _resp = h.delete_server(_id)
             h.check_apiresponse(_resp, "server {0} deleted".format(args.name))
 
-        if args.reboot:
+        if args.action:
             if not args.name:
                sys.stderr.write("Please supply a hostname\n")
                sys.exit(1)
             _id = h.get_serverid(args.name)
             h.debugprint("found id {0} for server {1}".format(_id, args.name))
-            _resp = h.post("servers/{0}/actions/reboot".format(_id))
+            _resp = h.post("servers/{id}/actions/{action}".format(id = _id, action = args.action))
+            if args.action == 'reset_password':
+                print("New root password for Server {server}: {password}".format(server=args.name, password =_resp.json()['root_password']))
             h.check_apiresponse(_resp)
+        
 
     if args.subcommand == "keys":
         if args.list:
