@@ -26,7 +26,8 @@ class HetznerCloudConnection:
         self.defaults = {
             'ssh_keys': [],
             'server_type': 'cx11',
-            'image': 'ubuntu-16.04'
+            'image': 'ubuntu-16.04',
+            'location': 'fsn1'
             }
         if len(self.sshkeys) == 1:
             self.defaults['ssh_keys'].append(self.sshkeys[0]['id'])
@@ -76,6 +77,13 @@ class HetznerCloudConnection:
                 _id = s['id']
         return _id
             
+    def get_server_by_id(self, serverid):
+        _name = None
+        for _s in self.servers:
+            if _s['id'] == serverid:
+                _name = _s['name']
+        return _name
+
     def get_sshkeys(self):
         _resp = self.get("ssh_keys")
         #self.debugprint(_resp)

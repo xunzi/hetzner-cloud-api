@@ -14,6 +14,8 @@ server_parser = subparsers.add_parser("servers", help = "Server commands")
 key_parser = subparsers.add_parser("keys", help = "Ssh key commands")
 images_parser = subparsers.add_parser("images", help = "image commands")
 servertype_parser = subparsers.add_parser("servertypes", help = "servertype commands")
+floatip_parser = subparsers.add_parser("floatingips", help = "floating ip commands")
+location_parser = subparsers.add_parser("locations", help = "location commands")
 
 server_parser.add_argument("-l", "--list", help = "list", action = "store_true")
 server_parser.add_argument("-c", "--create", help = "create", action = "store_true")
@@ -37,7 +39,9 @@ images_parser.add_argument("-l", "--list", help = "list", action = "store_true",
 
 servertype_parser.add_argument("-l", "--list", help = "list available server types", action = "store_true")
 
+floatip_parser.add_argument('-l', '--list', help = "list available floating ips", action = "store_true")
 
+location_parser.add_argument('-l', "--list", help = "list locations", action = "store_true")
 
 args = parser.parse_args()
 
@@ -123,3 +127,23 @@ if __name__ == "__main__":
             for _t in _resp:
                 print("- {0} - {1} - {2} cores, {3} GB RAM, {4} GB disk size, {5} storage".format(_t['id'], _t['name'], _t['cores'], _t['memory'], _t['disk'], _t['storage_type']))
             sys.exit(0)
+
+    if args.subcommand == "floatingips":
+        if args.list:
+            _resp = h.get("floating_ips")
+            for _i in _resp:
+                print("- {id} - {ip} - {description} - {server} - {location}".format(id = _i['id'], 
+                                                                                    ip = _i['ip'], 
+                                                                                    description = _i['description'], 
+                                                                                    server = h.get_server_by_id(_i['server']), 
+                                                                                    location = _i['home_location']['name'] ))
+
+    if args.subcommand == "locations":
+        if args.list:
+            _resp = h.get('locations')
+            for _l in _resp:
+                print("{id} - {name} - {description} - {city} - {country}".format(id = _l['id'], 
+                                                                                name = _l["name"], 
+                                                                                description = _l['description'], 
+                                                                                city = _l['city'], 
+                                                                                country = _l['country']) )
