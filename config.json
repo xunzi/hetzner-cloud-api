@@ -1,0 +1,7 @@
+{
+    "ssh_keys": "",
+    "server_type": "cx11",
+    "image": "ubuntu-18.04",
+    "location": "fsn1"
+
+}
