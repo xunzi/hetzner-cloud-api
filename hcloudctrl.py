@@ -2,12 +2,14 @@
 
 import api
 import sys
-
+import os
+import os.path
+import json
 import argparse
 
 
 parser = argparse.ArgumentParser()
-
+parser.add_argument("-c", "--configfile", help = "path to configfile", default = "{home}/.hcloud/config.json".format(home = os.environ['HOME']) )
 
 subparsers = parser.add_subparsers(title = "Subcommands", help = "Subcommands", dest = "subcommand")
 server_parser = subparsers.add_parser("servers", help = "Server commands")
@@ -49,6 +51,11 @@ args = parser.parse_args()
 
 if __name__ == "__main__":
     h = api.HetznerCloudConnection()
+    if os.path.isfile(args.configfile):
+        try:
+            h.defaults.update(json.load(open(args.configfile)))
+        except:
+            sys.stderr.write("Could not load config file\n")
     if args.subcommand == "servers":
         if args.list:
             h.debugprint(h.servers)
