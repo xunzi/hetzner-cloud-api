@@ -5,7 +5,7 @@ import sys
 import os
 
 APIVERSION = "v1"
-APIBASE = "https://api.hetzner.cloud/{0}".format(APIVERSION) 
+APIBASE = "https://api.hetzner.cloud/{apiversion}".format(apiversion = APIVERSION) 
 
 
 
@@ -18,7 +18,7 @@ class HetznerCloudConnection:
         except KeyError:
             sys.stderr.write("Missing env var API_TOKEN\n")
             sys.exit(1)
-        self.session.headers = { "Authorization": "Bearer {0}".format(self.token) }
+        self.session.headers = { "Authorization": "Bearer {token}".format(token = self.token) }
         self.servers = []
         self.sshkeys = []
         self.get_servers()
@@ -34,11 +34,11 @@ class HetznerCloudConnection:
         
     def debugprint(self, msg):
         if self.debug:
-            sys.stderr.write("{0}\n".format(msg))
+            sys.stderr.write("{msg}\n".format(msg = msg))
 
     def check_apiresponse(self, resp, okmsg=""):
         if not resp.ok:
-            sys.stderr.write("An errror occurred: {0}".format(resp.json()['error']['message']))
+            sys.stderr.write("An errror occurred: {errormsg}".format(errormsg = resp.json()['error']['message']))
             sys.exit(1)
         else:
             print(okmsg)
@@ -46,19 +46,19 @@ class HetznerCloudConnection:
             sys.exit(0)
 
     def get(self, path):
-        _resp = self.session.get("{0}/{1}".format(APIBASE, path))
+        _resp = self.session.get("{apibase}/{path}".format(apibase = APIBASE, path = path))
         #self.debugprint(_resp.text)
         return _resp.json()[path]
         
     def post(self,path, payload = {}):
         self.session.headers.update({"Content-Type": "application/json"})
-        _resp = self.session.post("{0}/{1}".format(APIBASE, path), json = payload)
+        _resp = self.session.post("{apibase}/{path}".format(apibase = APIBASE, path = path), json = payload)
         #self.debugprint(_resp.text)
         return _resp
 
     def delete_server(self,server_id):
         self.session.headers.update({"Content-Type": "application/json"})
-        _resp = self.session.delete("{0}/servers/{1}".format(APIBASE, server_id))
+        _resp = self.session.delete("{apibase}/servers/{id}".format(apibase = APIBASE, id = server_id))
         #self.debugprint(_resp.text)
         return _resp
 
@@ -115,7 +115,7 @@ class HetznerCloudConnection:
         
     def delete_key(self, keyid):
         #self.session.headers.update({"Content-Type": "application/json"})
-        _resp = self.session.delete("{0}/ssh_keys/{1}".format(APIBASE, keyid))
+        _resp = self.session.delete("{apibase}/ssh_keys/{keyid}".format(apibase = APIBASE, keyid = keyid))
         return _resp
 
         
