@@ -55,7 +55,8 @@ if __name__ == "__main__":
         try:
             h.defaults.update(json.load(open(args.configfile)))
         except:
-            sys.stderr.write("Could not load config file\n")
+            sys.stderr.write("Could not load config file {configfile}\n".format(args.configfile))
+
     if args.subcommand == "servers":
         if args.list:
             h.debugprint(h.servers)
