@@ -10,6 +10,7 @@ import argparse
 
 parser = argparse.ArgumentParser()
 parser.add_argument("-c", "--configfile", help = "path to configfile", default = "{home}/.hcloud/config.json".format(home = os.environ['HOME']) )
+parser.add_argument("-d", "--debug", help = "debug mode", action = "store_true", default = False)
 
 subparsers = parser.add_subparsers(title = "Subcommands", help = "Subcommands", dest = "subcommand")
 server_parser = subparsers.add_parser("servers", help = "Server commands")
@@ -23,7 +24,6 @@ server_parser.add_argument("-l", "--list", help = "list", action = "store_true")
 server_parser.add_argument("-c", "--create", help = "create", action = "store_true")
 server_parser.add_argument("-n", "--name", help = "name of item")
 server_parser.add_argument("-D", "--delete", help = "delete", action = "store_true")
-server_parser.add_argument("-d", "--debug", help = "debug mode", action = "store_true", default = False)
 server_parser.add_argument("-i", "--image", help = "image type, run {0} images -l to list available types".format(sys.argv[0]), dest = "imagetype")
 server_parser.add_argument("-t", "--type", help = "server type", dest = "servertype", default = api.HetznerCloudConnection().defaults["server_type"])
 server_parser.add_argument("-k", "--key", help = "ssh key to install", dest = "key", default = "" )
@@ -34,8 +34,6 @@ key_parser.add_argument("-i", "--import", help = "import key from file", action 
 key_parser.add_argument("-n", "--name", help = "name of item")
 key_parser.add_argument("-D", "--delete", help = "delete", action = "store_true")
 key_parser.add_argument("-f", "--file", help = "path to public key file to import", dest = "keyfile")
-key_parser.add_argument("-d", "--debug", help = "debug mode", action = "store_true", default = False)
-
 
 images_parser.add_argument("-l", "--list", help = "list", action = "store_true", default = True)
 
@@ -51,15 +49,26 @@ args = parser.parse_args()
 
 if __name__ == "__main__":
     h = api.HetznerCloudConnection()
-    if os.path.isfile(args.configfile):
-        try:
-            h.defaults.update(json.load(open(args.configfile)))
-        except:
-            sys.stderr.write("Could not load config file {configfile}\n".format(configfile = args.configfile))
+    if args.debug:
+        h.debug = True
+    if os.path.exists("{home}/.hcloud".format(home = os.environ['HOME'])):
+        if os.path.exists(args.configfile):
+            try:
+                h.defaults.update(json.load(open(args.configfile)))
+                h.debugprint("loaded preferences from config file {configfile}".format(configfile = args.configfile))
+            except:
+                h.debugprint("Could not load config file {configfile}".format(configfile = args.configfile))
+                h.debugprint(sys.exc_info()[0])
+        else:
+            json.dump(h.defaults, open(args.configfile, 'w'), indent=2, skipkeys = True)
+            h.debugprint("Created config file {configfile}".format(configfile = args.configfile))
+    else:
+        os.mkdir("{home}/.hcloud".format(home = os.environ['HOME']))
+        json.dump(h.defaults, open(args.configfile, 'w'), indent=2)
+        h.debugprint("Created config file {configfile}".format(configfile = args.configfile))
 
     if args.subcommand == "servers":
         if args.list:
-            h.debugprint(h.servers)
             for s in h.servers:
                 print("- Server id {id} - {name} - {ip} - {image}/{servertype} ({state})".format(
                     id = s['id'], 
@@ -69,9 +78,6 @@ if __name__ == "__main__":
                     image = s['image']['name'], 
                     servertype = s["server_type"]['name']))
                     
-        if args.debug:
-            h.debug = True
-
         if args.create:
             if not args.name:
                 sys.stderr.write("Please supply a hostname\n")
