@@ -29,6 +29,7 @@ server_parser.add_argument("-t", "--type", help = "server type", dest = "servert
 server_parser.add_argument("-k", "--key", help = "ssh key to install", dest = "key", default = "" )
 server_parser.add_argument("-a", "--action", choices = ['shutdown', 'reboot', 'reset', 'poweron', 'poweroff', 'reset_password'])
 
+
 key_parser.add_argument("-l", "--list", help = "list", action = "store_true")
 key_parser.add_argument("-i", "--import", help = "import key from file", action = "store_true", dest = "importkey")
 key_parser.add_argument("-n", "--name", help = "name of item")
@@ -40,6 +41,7 @@ images_parser.add_argument("-l", "--list", help = "list", action = "store_true",
 servertype_parser.add_argument("-l", "--list", help = "list available server types", action = "store_true")
 
 floatip_parser.add_argument('-l', '--list', help = "list available floating ips", action = "store_true")
+
 
 location_parser.add_argument('-l', "--list", help = "list locations", action = "store_true")
 
@@ -70,10 +72,11 @@ if __name__ == "__main__":
     if args.subcommand == "servers":
         if args.list:
             for s in h.servers:
-                print("- Server id {id} - {name} - {ip} - {image}/{servertype} ({state})".format(
+                print("- Server id {id} - {name} - {ipv4}/{ipv6} - {image}/{servertype} ({state})".format(
                     id = s['id'], 
                     name = s['name'], 
-                    ip = s['public_net']['ipv4']['ip'], 
+                    ipv4 = s['public_net']['ipv4']['ip'],
+                    ipv6 = s['public_net']['ipv6']['ip'],
                     state = s['status'], 
                     image = s['image']['name'], 
                     servertype = s["server_type"]['name']))
@@ -113,7 +116,6 @@ if __name__ == "__main__":
                 print("New root password for Server {server}: {password}".format(server=args.name, password =_resp.json()['root_password']))
             h.check_apiresponse(_resp)
         
-
     if args.subcommand == "keys":
         if args.list:
             for k in h.sshkeys:
@@ -157,8 +159,7 @@ if __name__ == "__main__":
 
     if args.subcommand == "floatingips":
         if args.list:
-            _resp = h.get("floating_ips")
-            for _i in _resp:
+            for _i in h.floatingips:
                 print("- {id} - {ip} - {description} - {server} - {location}".format(
                     id = _i['id'], 
                     ip = _i['ip'], 

@@ -21,8 +21,10 @@ class HetznerCloudConnection:
         self.session.headers = { "Authorization": "Bearer {token}".format(token = self.token) }
         self.servers = []
         self.sshkeys = []
+        self.floatingips = []
         self.get_servers()
         self.get_sshkeys()
+        self.get_floatingips()
         self.defaults = {
             'ssh_keys': [],
             'server_type': 'cx11',
@@ -69,6 +71,11 @@ class HetznerCloudConnection:
         #self.debugprint("Found {0} servers".format(len(self.servers)))
         #for _s in self.servers:
         #    self.debugprint("{0} - {1} - {2}".format(_s['id'], _s['name'], _s['public_net']['ipv4']['ip']))
+
+    def get_floatingips(self):
+        _resp = self.get("floating_ips")
+        for _ip in _resp:
+            self.floatingips.append(_ip)
 
     def get_serverid(self, name):
         _id = None
