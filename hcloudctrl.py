@@ -31,7 +31,7 @@ server_parser.add_argument("-t", "--type", help="server type", dest="servertype"
 server_parser.add_argument("-k", "--key", help="ssh key to install", dest="key", default="")
 server_parser.add_argument("-a", "--action", choices=['shutdown', 'reboot', 'reset', 'poweron', 'poweroff', 'reset_password'])
 server_parser.add_argument("-p", "--protect", help="toggle server protection", choices=["both", "none"])
-
+server_parser.add_argument("-R", "--rebuild", help="Rebuild Server, if no type arg is given will re-use image type", dest="rebuild", action="store_true")
 
 key_parser.add_argument("-l", "--list", help="list", action="store_true")
 key_parser.add_argument("-i", "--import", help="import key from file", action="store_true", dest="importkey")
@@ -132,6 +132,19 @@ if __name__ == "__main__":
                 _resp = h.post("servers/{id}/actions/change_protection".format(id=_id), payload={"delete": False, "rebuild": False})
                 h.check_apiresponse(_resp)
 
+        if args.rebuild:
+            if not args.name:
+                sys.stderr.write("Please supply a hostname\n")
+                sys.exit(1)
+            _s = h.get_server(servername=args.name)
+            if not args.imagetype:
+                image = _s['image']['name']
+            else:
+                image = args.imagetype
+            _id = _s['id']
+            _resp = h.post("servers/{id}/actions/rebuild".format(id=_id), payload={'image': image})
+            h.check_apiresponse(_resp)
+
     if args.subcommand == "keys":
         if args.list:
             for k in h.sshkeys:
@@ -170,28 +183,27 @@ if __name__ == "__main__":
                     cores=_t['cores'],
                     memory=_t['memory'],
                     disk=_t['disk'],
-                    storage=_t['storage_type'])
-                    )
-            sys.exit(0)
+                    storage=_t['storage_type']))
+        sys.exit(0)
 
     if args.subcommand == "floatingips":
         if args.list:
             for _i in h.floatingips:
                 print("- {id} - {ip} - {description} - {server} - {location}".format(
-                    id = _i['id'], 
-                    ip = _i['ip'], 
-                    description = _i['description'], 
-                    server = h.get_server_by_id(_i['server']), 
-                    location = _i['home_location']['name'] ))
+                    id=_i['id'],
+                    ip=_i['ip'],
+                    description=_i['description'],
+                    server=h.get_server_by_id(_i['server']),
+                    location=_i['home_location']['name']))
 
     if args.subcommand == "locations":
         if args.list:
             _resp = h.get('locations')
             for _l in _resp:
                 print("{id} - {name} - {description} - {city} - {country}".format(
-                    id = _l['id'], 
-                    name = _l["name"], 
-                    description = _l['description'], 
-                    city = _l['city'], 
-                    country = _l['country'])
-                    )
+                    id=_l['id'],
+                    name=_l["name"],
+                    description=_l['description'],
+                    city=_l['city'],
+                    country=_l['country'])
+                )
