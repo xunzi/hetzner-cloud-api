@@ -9,7 +9,7 @@ import argparse
 
 
 parser = argparse.ArgumentParser()
-parser.add_argument("-c", "--configfile", help="path to configfile",
+parser.add_argument("-c", "--configfile", help="path to configfile, default $HOME/.hcloud/config.json",
                     default="{home}/.hcloud/config.json".format(home=os.environ['HOME']))
 parser.add_argument("-d", "--debug", help="debug mode",
                     action="store_true", default=False)
