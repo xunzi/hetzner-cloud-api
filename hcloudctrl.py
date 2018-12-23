@@ -32,6 +32,7 @@ server_parser.add_argument("-k", "--key", help="ssh key to install", dest="key",
 server_parser.add_argument("-a", "--action", choices=['shutdown', 'reboot', 'reset', 'poweron', 'poweroff', 'reset_password'])
 server_parser.add_argument("-p", "--protect", help="toggle server protection", choices=["both", "none"])
 server_parser.add_argument("-R", "--rebuild", help="Rebuild Server, if no type arg is given will re-use image type", dest="rebuild", action="store_true")
+server_parser.add_argument("-L", "--location", help="Location", default="fsn1", dest="location")
 
 key_parser.add_argument("-l", "--list", help="list", action="store_true")
 key_parser.add_argument("-i", "--import", help="import key from file", action="store_true", dest="importkey")
@@ -96,6 +97,8 @@ if __name__ == "__main__":
             if args.key:
                 _k = h.get_keyid(args.key)
                 h.defaults["ssh_keys"] = [_k]
+            if args.location:
+                h.defaults["location"] = args.location
             _resp = h.create_server(args.name)
             h.check_apiresponse(_resp, "server {name} created".format(name=args.name))
 
