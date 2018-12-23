@@ -100,6 +100,8 @@ if __name__ == "__main__":
             if args.location:
                 h.defaults["location"] = args.location
             _resp = h.create_server(args.name)
+            if not h.defaults["ssh_keys"]:
+                print("root-PW: {rootpw}".format(rootpw=_resp.json()["root_password"]))
             h.check_apiresponse(_resp, "server {name} created".format(name=args.name))
 
         if args.delete:
