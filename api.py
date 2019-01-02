@@ -21,9 +21,11 @@ class HetznerCloudConnection:
         self.servers = []
         self.sshkeys = []
         self.floatingips = []
+        self.volumes = []
         self.get_servers()
         self.get_sshkeys()
         self.get_floatingips()
+        self.get_volumes()
         self.defaults = {
             'ssh_keys': [],
             'server_type': 'cx11',
@@ -57,6 +59,11 @@ class HetznerCloudConnection:
         # self.debugprint(_resp.text)
         return _resp
 
+    def delete(self, path, payload={}):
+        self.session.headers.update({"Content-Type": "application/json"})
+        _resp = self.session.delete("{apibase}/{path}".format(apibase=APIBASE, path=path), json=payload)
+        return _resp
+
     def delete_server(self, server_id):
         self.session.headers.update({"Content-Type": "application/json"})
         _resp = self.session.delete("{apibase}/servers/{id}".format(apibase=APIBASE, id=server_id))
@@ -75,6 +82,11 @@ class HetznerCloudConnection:
         _resp = self.get("floating_ips")
         for _ip in _resp:
             self.floatingips.append(_ip)
+
+    def get_volumes(self):
+        _resp = self.get("volumes")
+        for _v in _resp:
+            self.volumes.append(_v)
 
     def get_serverid(self, name):
         _id = None

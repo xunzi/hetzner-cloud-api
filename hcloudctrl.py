@@ -21,6 +21,7 @@ images_parser = subparsers.add_parser("images", help="image commands")
 servertype_parser = subparsers.add_parser("servertypes", help="servertype commands")
 floatip_parser = subparsers.add_parser("floatingips", help="floating ip commands")
 location_parser = subparsers.add_parser("locations", help="location commands")
+volume_parser = subparsers.add_parser("volumes", help="volume commands")
 
 server_parser.add_argument("-l", "--list", help="list", action="store_true")
 server_parser.add_argument("-c", "--create", help="create", action="store_true")
@@ -47,6 +48,15 @@ servertype_parser.add_argument("-l", "--list", help="list available server types
 floatip_parser.add_argument('-l', '--list', help="list available floating ips", action="store_true")
 
 location_parser.add_argument('-l', "--list", help="list locations", action="store_true")
+
+volume_parser.add_argument("-l", "--list", help="List volumes", action="store_true")
+volume_parser.add_argument("-c", "--create", help="Create volume", action="store_true")
+volume_parser.add_argument("-D", "--delete", help="Delete volume", action="store_true")
+volume_parser.add_argument("-n", "--name", help="Name for the new volume")
+volume_parser.add_argument("-S", "--server", help="Server to attach volume to")
+volume_parser.add_argument("-s", "--size", help="Size of volume in GB, defaults to 10 GB", default=10)
+volume_parser.add_argument("-a", "--automount", help="automatically mount volume", action="store_true")
+volume_parser.add_argument("-f", "--format", help="format volume", choices=['ext4', 'xfs'])
 
 args = parser.parse_args()
 
@@ -212,3 +222,45 @@ if __name__ == "__main__":
                     city=_l['city'],
                     country=_l['country'])
                 )
+    if args.subcommand == "volumes":
+        if args.list:
+            _resp = h.get("volumes")
+            for _v in _resp:
+                if _v['server']:
+                    server_name = h.get_server(servername=_v['server'])
+                    print("{id} - {name} - {size} GB - attached to server {server_name}".format(
+                        id=_v['id'],
+                        name=_v['id'],
+                        size=_v['size'],
+                        server_name=h.get_server(serverid=_v['server'])['name']
+                        )
+                    )
+                else:
+                    print("{id} - {name} - {size} GB - curently not attached".format(
+                        id = _v['id'],
+                        name = _v['name'],
+                        size=_v['size']
+                        )
+                    )
+        if args.create:
+            if not args.name:
+                sys.stderr.write("Please supply a hostname\n")
+                sys.exit(1)
+            vol_spec = {'name': args.name, 'size': args.size}
+            if args.server:
+                vol_spec['server'] = h.get_serverid(args.server)
+            if args.automount:
+                vol_spec['automount'] = args.automount
+            if args.format:
+                vol_spec['format'] = args.format
+            _resp = h.post("volumes", payload=vol_spec)
+            h.check_apiresponse(_resp, "Volume {volname} created".format(volname=args.name))
+        if args.delete:
+            if not args.name:
+                sys.stderr.write("Please supply a hostname\n")
+                sys.exit(1)
+            for v in h.volumes:
+                if v['name'] == args.name:
+                    v_id = v['id']
+            _resp = h.delete("volumes/{id}".format(id=v_id))
+            h.check_apiresponse(_resp, "Volume {v_id} deleted".format(v_id=v_id))
