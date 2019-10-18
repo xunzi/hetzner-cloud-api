@@ -29,7 +29,7 @@ class HetznerCloudConnection:
         self.defaults = {
             'ssh_keys': [],
             'server_type': 'cx11',
-            'image': 'ubuntu-16.04',
+            'image': 'ubuntu-18.04',
             'location': 'fsn1'
         }
         if len(self.sshkeys) == 1:
