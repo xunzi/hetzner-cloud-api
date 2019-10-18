@@ -24,6 +24,7 @@ location_parser = subparsers.add_parser("locations", help="location commands")
 volume_parser = subparsers.add_parser("volumes", help="volume commands")
 
 server_parser.add_argument("-l", "--list", help="list", action="store_true")
+server_parser.add_argument("-j", "--json", help="Json output suitable as nasible inventory", default=False, action="store_true")
 server_parser.add_argument("-c", "--create", help="create", action="store_true")
 server_parser.add_argument("-n", "--name", help="name of item")
 server_parser.add_argument("-D", "--delete", help="delete", action="store_true")
@@ -83,18 +84,23 @@ if __name__ == "__main__":
     if args.subcommand == "servers":
         if args.list:
             for s in h.servers:
-                print("- Server id {id} - {name} - {ipv4}/{ipv6} - {datacenter} {image}/{servertype} ({state}) [Protected against Deletion:{deletion}, Rebuild: {rebuild}]".format(
-                    id=s['id'],
-                    name=s['name'],
-                    ipv4=s['public_net']['ipv4']['ip'],
-                    ipv6=s['public_net']['ipv6']['ip'],
-                    state=s['status'],
-                    image=s['image']['name'],
-                    servertype=s["server_type"]['name'],
-                    deletion=s["protection"]["delete"],
-                    rebuild=s["protection"]["rebuild"],
-                    datacenter=s["datacenter"]["name"])
-                )
+                if args.json:
+                    inventory = {"hostvars": {s['name']: {'ansible_host': s['public_net']['ipv4']['ip']}}}
+                    print(json.dumps(inventory))
+                    
+                else:
+                    print("- Server id {id} - {name} - {ipv4}/{ipv6} - {datacenter} {image}/{servertype} ({state}) [Protected against Deletion:{deletion}, Rebuild: {rebuild}]".format(
+                        id=s['id'],
+                        name=s['name'],
+                        ipv4=s['public_net']['ipv4']['ip'],
+                        ipv6=s['public_net']['ipv6']['ip'],
+                        state=s['status'],
+                        image=s['image']['name'],
+                        servertype=s["server_type"]['name'],
+                        deletion=s["protection"]["delete"],
+                        rebuild=s["protection"]["rebuild"],
+                        datacenter=s["datacenter"]["name"])
+                    )
 
         if args.create:
             if not args.name:
