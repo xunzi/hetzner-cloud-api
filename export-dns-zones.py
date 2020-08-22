@@ -32,7 +32,7 @@ def mkrequest(method="get", path="", additional_headers = {}):
 
 def handle_args():
     parser = argparse.ArgumentParser()
-    parser.add_argument("-o", "--outputfile", help="path to outputfile")
+    parser.add_argument("-o", "--outputfile", help="outputfile name")
     parser.add_argument("-d", "--debug", help="debug mode", action="store_true", default=False)
     parser.add_argument("-z", "--zone", help="Name of zone to be exported")
     parser.add_argument("-a", "--all", help="export all zones", action="store_true", default=False)
@@ -70,14 +70,20 @@ if __name__ == "__main__":
         sys.exit(1)
     zones = get_all_zones()
     
+    if args.outputfile:
+        outfile = open(args.outputfile, 'w')
+        original_stdout = sys.stdout
+        sys.stdout = outfile
+
     if args.all:
         for zone in zones:
             #print(zone['id'])
             print(export_zone(zone['id']))
     elif args.zone:
-
         _zone_id = get_zone_id(args.zone)
         if _zone_id:
             print(export_zone(_zone_id))
         else:
             sys.stderr.write("Zone {zone_name} not found\n".format(zone_name=args.zone))
+    if args.outputfile:
+        sys.stdout = original_stdout
