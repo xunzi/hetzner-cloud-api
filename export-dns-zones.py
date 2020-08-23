@@ -1,4 +1,7 @@
 #!/usr/bin/env python3
+# this is just an attempt to get familiar with the Hetzner DNS api
+# ultimately the api calls will be moved to the api lib
+
 
 import requests
 import argparse
