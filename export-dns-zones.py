@@ -32,7 +32,8 @@ def mkrequest(method="get", path="", additional_headers = {}):
 
 def handle_args():
     parser = argparse.ArgumentParser()
-    parser.add_argument("-o", "--outputfile", help="outputfile name")
+    parser.add_argument("-o", "--outputfile", help="outputfile name, default is stdout")
+    parser.add_argument("-O", "--outputdir", help="output directory for batch output, implies --all")
     parser.add_argument("-d", "--debug", help="debug mode", action="store_true", default=False)
     parser.add_argument("-z", "--zone", help="Name of zone to be exported")
     parser.add_argument("-a", "--all", help="export all zones", action="store_true", default=False)
@@ -70,6 +71,17 @@ if __name__ == "__main__":
         sys.exit(1)
     zones = get_all_zones()
     
+    if args.outputdir:
+        debugprint("Option --outputdir supplied, assuming option --all")
+        for zone in zones:
+            zone_name = zone['name']
+            zone_id = zone['id']
+            with open('{outputdir}/{zone_name}.zone'.format(outputdir=args.outputdir, zone_name=zone_name), 'w') as outfile:
+                debugprint("exporting zone {zone_name}".format(zone_name=zone_name))
+                zone_content = export_zone(zone_id)
+                outfile.write(zone_content)
+        sys.exit(0)
+    #set stdout to output file handle
     if args.outputfile:
         outfile = open(args.outputfile, 'w')
         original_stdout = sys.stdout
@@ -85,5 +97,6 @@ if __name__ == "__main__":
             print(export_zone(_zone_id))
         else:
             sys.stderr.write("Zone {zone_name} not found\n".format(zone_name=args.zone))
+    #reset stdout
     if args.outputfile:
         sys.stdout = original_stdout
