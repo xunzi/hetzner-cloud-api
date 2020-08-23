@@ -87,7 +87,6 @@ if __name__ == "__main__":
                 if args.json:
                     inventory = {"hostvars": {s['name']: {'ansible_host': s['public_net']['ipv4']['ip']}}}
                     print(json.dumps(inventory))
-                    
                 else:
                     print("- Server id {id} - {name} - {ipv4}/{ipv6} - {datacenter} {image}/{servertype} ({state}) [Protected against Deletion:{deletion}, Rebuild: {rebuild}]".format(
                         id=s['id'],
@@ -238,15 +237,13 @@ if __name__ == "__main__":
                         id=_v['id'],
                         name=_v['id'],
                         size=_v['size'],
-                        server_name=h.get_server(serverid=_v['server'])['name']
-                        )
+                        server_name=h.get_server(serverid=_v['server'])['name'])
                     )
                 else:
                     print("{id} - {name} - {size} GB - curently not attached".format(
-                        id = _v['id'],
-                        name = _v['name'],
-                        size=_v['size']
-                        )
+                        id=_v['id'],
+                        name=_v['name'],
+                        size=_v['size'])
                     )
         if args.create:
             if not args.name:
