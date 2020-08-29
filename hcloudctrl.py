@@ -84,11 +84,16 @@ if __name__ == "__main__":
     if args.subcommand == "servers":
         if args.list:
             for s in h.servers:
+                for floatip in h.floatingips:
+                    if floatip['server'] == s['id']:
+                        floatip_info = "Floating Ip {f_ip}@{location}.".format(f_ip=floatip['ip'], location=floatip['home_location']['name'])
+                    else:
+                        floatip_info = ''
                 if args.json:
                     inventory = {"hostvars": {s['name']: {'ansible_host': s['public_net']['ipv4']['ip']}}}
                     print(json.dumps(inventory))
                 else:
-                    print("- Server id {id} - {name} - {ipv4}/{ipv6} - {datacenter} {image}/{servertype} ({state}) [Protected against Deletion:{deletion}, Rebuild: {rebuild}]".format(
+                    print("- Server id {id} - {name} - {ipv4}/{ipv6} - {datacenter} {image}/{servertype} ({state}) [Protected against Deletion: {deletion}, Rebuild: {rebuild}] {floatingip}".format(
                         id=s['id'],
                         name=s['name'],
                         ipv4=s['public_net']['ipv4']['ip'],
@@ -98,7 +103,9 @@ if __name__ == "__main__":
                         servertype=s["server_type"]['name'],
                         deletion=s["protection"]["delete"],
                         rebuild=s["protection"]["rebuild"],
-                        datacenter=s["datacenter"]["name"])
+                        datacenter=s["datacenter"]["name"],
+                        floatingip=floatip_info
+                        )
                     )
 
         if args.create:
@@ -215,6 +222,7 @@ if __name__ == "__main__":
                     description=_i['description'],
                     server=h.get_server_by_id(_i['server']),
                     location=_i['home_location']['name']))
+
 
     if args.subcommand == "locations":
         if args.list:
