@@ -84,6 +84,8 @@ if __name__ == "__main__":
     if args.subcommand == "servers":
         if args.list:
             for s in h.servers:
+                if len(h.floatingips) == 0:
+                    floatip_info = ''
                 for floatip in h.floatingips:
                     if floatip['server'] == s['id']:
                         floatip_info = "Floating Ip {f_ip}@{location}.".format(f_ip=floatip['ip'], location=floatip['home_location']['name'])
