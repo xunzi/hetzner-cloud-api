@@ -206,9 +206,10 @@ if __name__ == "__main__":
         if args.list:
             _resp = h.get("server_types")
             for _t in _resp:
-                print("- {id} - {name} - {cores} cores, {memory} GB RAM, {disk} GB disk size, {storage} storage".format(
+                print("- {id} - {name} - {arch} - {cores} cores, {memory} GB RAM, {disk} GB disk size, {storage} storage".format(
                     id=_t['id'],
                     name=_t['name'],
+                    arch = _t['architecture'],
                     cores=_t['cores'],
                     memory=_t['memory'],
                     disk=_t['disk'],
